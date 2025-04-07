@@ -94,7 +94,14 @@ def automation(strom):
             pass
         elif operator == '*':
             automat = automaty[0]
-            starts = automat['starting'].copy()
+            automat['ending'] = set(automat['ending'])
+            automat['ending'].extend(automat['starting'])
+            automat['ending'] = list(automat['ending'])
+            for node in automat['nodes']:
+                for znak, cesty in node.items():
+                    if any(e in cesty for e in automat['ending']):
+                        node[znak].extend(automat['starting'])
+                        node[znak] = list(set(node[znak]))
 
 
 
@@ -106,7 +113,7 @@ def automat_shift(automat, n):
     automat['nodes'] = [defaultdict(def_fun) for _ in range(n)] + automat['nodes']
     for node in automat['nodes']:
         for k, v in node.items():
-            node[k] = v+n
+            node[k] = [x+n for x in v]
 
 strom = parse_or('(ab)*b*|a(a|b)|ab*|')
 print(strom)
@@ -114,11 +121,11 @@ a = {
     'starting': [0],
     'ending': [1],
     'nodes': [
-        defaultdict(def_fun, {'a':1}),
+        defaultdict(def_fun, {'a':[1]}),
         defaultdict(def_fun)
     ]
 }
-automat_shift(a, 3)
+automat_shift(a, 1)
 print(a)
 
 '''
