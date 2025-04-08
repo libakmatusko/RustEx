@@ -49,7 +49,7 @@ def parse_join(regex):
                 zaciatok = i+1
     if zatvorky!=0:
         if not(zatvorky==1 and regex[-1]==')'):
-            raise "neočekávaný konec řetězce"
+            raise BaseException("neočekávaný konec řetězce")
 
     sub_regex.append(regex[zaciatok:])
     #print(sub_regex)
@@ -59,7 +59,7 @@ def parse_join(regex):
 
 def parse_iter(regex):
     if regex == '*':
-        raise "Nezadavaj hluposti, nevies pisat."
+        raise BaseException("Nezadavaj hluposti, nevies pisat.")
     if len(regex) == 0:
         return regex
     if regex[-1] == '*':
