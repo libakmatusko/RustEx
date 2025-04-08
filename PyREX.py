@@ -12,6 +12,7 @@ import tkinter as tk
     // .      hocijaky znak
 '''
 def_fun = lambda: []
+def_fun2 = lambda: -1
 #tvarime sa ze funguje ale nefunguje
 def parse_or(regex):
     sub_regex = []
@@ -189,22 +190,29 @@ def automat_det(automat):
 
     return new_automat
 
-strom = parse_or('(ab)b')
-strom = parse_or('()a')
-print(strom)
-pp(automation(strom), width=100)
-pp(automat_det(automation(strom)), width=100)
 
-a = {
-    'starting': [0],
-    'ending': [1],
-    'nodes': [
-        defaultdict(def_fun, {'a':[1]}),
-        defaultdict(def_fun)
-    ]
-}
-automat_shift(a, 1)
-#print(a)
+def is_valid(string, automat):
+    n_i = automat['starting'][0]
+    for char in string:
+        print(n_i)
+        new_i = automat['nodes'][n_i][char]
+        if new_i == []:
+            return False
+        n_i = new_i
+    if n_i in automat['ending']:
+        return True
+    return False
+
+strom = parse_or('(ab)b')
+strom = parse_or('a|b*')
+print(strom)
+a = automation(strom) 
+pp(a, width=100)
+a = automat_det(a)
+pp(a, width=100)
+print(is_valid('', a))
+
+
 
 '''
 automat: {
