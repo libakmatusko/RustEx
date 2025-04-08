@@ -129,47 +129,67 @@ def automat_shift(automat, n):
 
 class Mapa:
     def __init__(self):
-        slovnik = {}
-        i = -1
+        self.slovnik = {}
+        self.reverse = []
+        self.i = -1
         self.stack = []
+
     def index(self, stav):
-        stav = tuple(sorted(list(set(stavy))))
-        if stav in slovnik:
-            return slovnik[stav]
-        i+=1
-        slovnik[stav] = i
-        self.stack.append(i)
-        return i
+        stav = tuple(sorted(list(set(stav))))
+        if stav in self.slovnik:
+            return self.slovnik[stav]
+        self.i+=1
+        self.slovnik[stav] = self.i
+        self.reverse.append(stav)
+        self.stack.append(self.i)
+        return self.i
+    
+    def rev(self, index):
+        return self.reverse[index]
+
     def pop(self):
         return self.stack.pop()
+    
+    def empty(self):
+        return not bool(self.stack)
 
 
 def automat_det(automat):
     m = Mapa()
-
-    new_i = m.index(automat['starting'])
-    nodes = automat['starting']
-    new_node = defaultdict(def_fun)
-    for n in nodes:
-        for char, prechody in n.items():
-            new_node[char].extend(prechody)
-    for prechody in new_node.values():
-        prechody = m.index(prechody)
-    
     new_automat = {
-        'starting': [new_i],
+        'starting': [m.index(automat['starting'])],
         'ending': [],
-        'nodes': [
-            defaultdict(def_fun, {'a':[1]})
-        ]
+        'nodes': []
     }
 
-    return
+    m.index(automat['starting'])
+    while not m.empty():
+        #pp(new_automat, width=300)
+        new_i = m.pop()
+        nodes = m.rev(new_i)
+        new_node = defaultdict(def_fun)
+        for n_i in nodes:
+            n = automat['nodes'][n_i]
+            for char, prechody in n.items():
+                new_node[char].extend(prechody)
+        for char in new_node.keys():
+            new_node[char] = m.index(new_node[char])
+        
+        if len(new_automat['nodes']) <= new_i:
+            new_automat['nodes'] +=  [None for _ in range(new_i-len(new_automat['nodes'])+1)]
+        new_automat['nodes'][new_i] = new_node.copy()
+    
+    for i in range(len(new_automat['nodes'])):
+        if any([x in automat['ending'] for x in m.rev(i)]):
+            new_automat['ending'].append(i)
 
-strom = parse_or('(ab)*b*|a(a|b)|ab*|')
-strom = parse_or('()a')
+    return new_automat
+
+strom = parse_or('(ab)b')
+strom = parse_or('a*')
 print(strom)
 pp(automation(strom), width=100)
+pp(automat_det(automation(strom)), width=100)
 
 a = {
     'starting': [0],
