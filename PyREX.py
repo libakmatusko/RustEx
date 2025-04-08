@@ -228,6 +228,7 @@ vygen_automat = {}
 def gen():
     global vygen_automat
     vygen_automat = automat_det(automation(parse_or(entry.get().strip())))
+    generation_status_label.config(text="Generation completed!")
 
 def validate():
     valid = is_valid(text_input.get("1.0", tk.END).strip(), vygen_automat)
@@ -251,6 +252,9 @@ entry.pack(pady=(0, 10))
 # Generate button
 generate_button = tk.Button(root, text="Generate", command=gen)
 generate_button.pack(pady=(0, 20))
+
+generation_status_label = tk.Label(root, text="", fg="green")
+generation_status_label.pack(pady=(0, 10))
 
 # Text widget
 text_label = tk.Label(root, text="Text Input:")
