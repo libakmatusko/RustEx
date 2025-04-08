@@ -8,7 +8,7 @@ import tkinter as tk
     // ab     join
     // a*     iterator
     // ()
-    // .      hocijaky znak
+    // .      hocijaky znak '(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9)'
 '''
 def_fun = lambda: []
 def_fun2 = lambda: -1
@@ -60,13 +60,15 @@ def parse_join(regex):
 def parse_iter(regex):
     if regex == '*':
         raise BaseException("Nezadavaj hluposti, nevies pisat.")
-    if len(regex) == 0:
+    elif len(regex) == 0:
         return regex
-    if regex[-1] == '*':
+    elif regex[-1] == '*':
         return ['*', parse_pran(regex[:-1])]
     return parse_pran(regex)
 
 def parse_pran(regex):
+    if regex == '.':
+        return parse_pran('(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9)')
     if regex == '(':
         raise BaseException("Zly vstup '('")
     if regex.count('(') != regex.count(')'):
@@ -220,27 +222,29 @@ def is_valid(string, automat):
     return False
 
 strom = parse_or('(ab)b')
-strom = parse_or('()a')
+strom = parse_or('.')
 #print(strom)
 a = automation(strom)
-pp(a, width=100)
+pp(a, width=300)
 a = automat_det(a)
-pp(a, width=100)
-#print(is_valid('', a))
+pp(a, width=300)
+print(is_valid('a', a))
 
 vygen_automat = {}
 def gen():
     global vygen_automat
     try:
+        print(entry.get())
         vygen_automat = automat_det(automation(parse_or(entry.get())))
         generation_status_label.config(text="Generation completed!")
     except BaseException as x:
-        result_label.config(text=x)
+        generation_status_label.config(text=x)
 
 
 def validate():
     try:
-        valid = is_valid(text_input.get("1.0", tk.END), vygen_automat)
+        print(text_input.get("1.0", tk.END))
+        valid = is_valid(text_input.get("1.0", tk.END)[:-1], vygen_automat)
         if valid:
             result_label.config(text="Vyhovuje!")
         else:
