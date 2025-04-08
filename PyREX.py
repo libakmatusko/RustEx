@@ -232,7 +232,7 @@ vygen_automat = {}
 def gen():
     global vygen_automat
     try:
-        vygen_automat = automat_det(automation(parse_or(entry.get().strip())))
+        vygen_automat = automat_det(automation(parse_or(entry.get())))
         generation_status_label.config(text="Generation completed!")
     except BaseException as x:
         result_label.config(text=x)
@@ -240,7 +240,7 @@ def gen():
 
 def validate():
     try:
-        valid = is_valid(text_input.get("1.0", tk.END).strip(), vygen_automat)
+        valid = is_valid(text_input.get("1.0", tk.END), vygen_automat)
         if valid:
             result_label.config(text="Vyhovuje!")
         else:
