@@ -10,8 +10,8 @@ from pprint import pp
     // ()
     // .      hocijaky znak
 '''
-def_fun = lambda: -1
-
+def_fun = lambda: []
+#tvarime sa ze funguje ale nefunguje
 def parse_or(regex):
     sub_regex = []
     zaciatok = 0
@@ -127,13 +127,47 @@ def automat_shift(automat, n):
             node[k] = [x+n for x in v]
 
 
-def automat_det(automat):
-    
+class Mapa:
+    def __init__(self):
+        slovnik = {}
+        i = -1
+        self.stack = []
+    def index(self, stav):
+        stav = tuple(sorted(list(set(stavy))))
+        if stav in slovnik:
+            return slovnik[stav]
+        i+=1
+        slovnik[stav] = i
+        self.stack.append(i)
+        return i
+    def pop(self):
+        return self.stack.pop()
 
-    return automat
+
+def automat_det(automat):
+    m = Mapa()
+
+    new_i = m.index(automat['starting'])
+    nodes = automat['starting']
+    new_node = defaultdict(def_fun)
+    for n in nodes:
+        for char, prechody in n.items():
+            new_node[char].extend(prechody)
+    for prechody in new_node.values():
+        prechody = m.index(prechody)
+    
+    new_automat = {
+        'starting': [new_i],
+        'ending': [],
+        'nodes': [
+            defaultdict(def_fun, {'a':[1]})
+        ]
+    }
+
+    return
 
 strom = parse_or('(ab)*b*|a(a|b)|ab*|')
-strom = parse_or('a|b')
+strom = parse_or('()a')
 print(strom)
 pp(automation(strom), width=100)
 
