@@ -1,7 +1,7 @@
 from collections import defaultdict
 from pprint import pp
+import tkinter as tk
 
-#regex = input().strip()
 
 '''
     // a|b    or
@@ -11,6 +11,7 @@ from pprint import pp
     // .      hocijaky znak
 '''
 def_fun = lambda: []
+def_fun2 = lambda: -1
 #tvarime sa ze funguje ale nefunguje
 def parse_or(regex):
     sub_regex = []
@@ -57,6 +58,8 @@ def parse_join(regex):
     return ['+'] + [parse_iter(x) for x in sub_regex]
 
 def parse_iter(regex):
+    if regex == '*':
+        raise "Nezadavaj hluposti, nevies pisat."
     if len(regex) == 0:
         return regex
     if regex[-1] == '*':
@@ -112,6 +115,9 @@ def automation(strom):
                             node[znak] = list(set(node[znak]))
                 automat['nodes'].extend(aut['nodes'][n:])
                 automat['ending'] = aut['ending']
+                if any(e in automat['starting'] for e in automat['ending']):
+                    automat['starting'].extend(aut['starting'])
+                    automat['starting'] = list(set(automat['starting'])) #netreba ale bojim sa
 
         elif operator == '*':
             automat = automaty[0]
@@ -137,70 +143,129 @@ def automat_shift(automat, n):
 
 class Mapa:
     def __init__(self):
-        slovnik = {}
-        i = -1
+        self.slovnik = {}
+        self.reverse = []
+        self.i = -1
         self.stack = []
+
     def index(self, stav):
         stav = tuple(sorted(list(set(stav))))
         if stav in self.slovnik:
             return self.slovnik[stav]
         self.i+=1
         self.slovnik[stav] = self.i
+        self.reverse.append(stav)
         self.stack.append(self.i)
         return self.i
+
+    def rev(self, index):
+        return self.reverse[index]
+
     def pop(self):
         return self.stack.pop()
+
+    def empty(self):
+        return not bool(self.stack)
 
 
 def automat_det(automat):
     m = Mapa()
-
-    new_i = m.index(automat['starting'])
-    nodes = automat['starting']
-    new_node = defaultdict(def_fun)
-    for n in nodes:
-        for char, prechody in n.items():
-            new_node[char].extend(prechody)
-    for prechody in new_node.values():
-        prechody = m.index(prechody)
-    
     new_automat = {
-        'starting': [new_i],
+        'starting': [m.index(automat['starting'])],
         'ending': [],
-        'nodes': [
-            defaultdict(def_fun, {'a':[1]})
-        ]
+        'nodes': []
     }
 
-    return
+    m.index(automat['starting'])
+    while not m.empty():
+        #pp(new_automat, width=300)
+        new_i = m.pop()
+        nodes = m.rev(new_i)
+        new_node = defaultdict(def_fun)
+        for n_i in nodes:
+            n = automat['nodes'][n_i]
+            for char, prechody in n.items():
+                new_node[char].extend(prechody)
+        for char in new_node.keys():
+            new_node[char] = m.index(new_node[char])
+
+        if len(new_automat['nodes']) <= new_i:
+            new_automat['nodes'] +=  [None for _ in range(new_i-len(new_automat['nodes'])+1)]
+        new_automat['nodes'][new_i] = new_node.copy()
+    
+    for i in range(len(new_automat['nodes'])):
+        if any([x in automat['ending'] for x in m.rev(i)]):
+            new_automat['ending'].append(i)
+
+    return new_automat
 
 strom = parse_or('(ab)*b*|a(a|b)|ab*|')
-strom = parse_or('*')
+strom = parse_or('()a')
 print(strom)
 pp(automation(strom), width=100)
 
-a = {
-    'starting': [0],
-    'ending': [1],
-    'nodes': [
-        defaultdict(def_fun, {'a':[1]}),
-        defaultdict(def_fun)
-    ]
-}
-automat_shift(a, 1)
-#print(a)
+def is_valid(string, automat):
+    n_i = automat['starting'][0]
+    for char in string:
+        print(n_i)
+        new_i = automat['nodes'][n_i][char]
+        if new_i == []:
+            return False
+        n_i = new_i
+    if n_i in automat['ending']:
+        return True
+    return False
 
-'''
-automat: {
-    strating : [],
-    ending : [],
-    nodes : [{
-        char:index
-    }]
-}
-'''
+strom = parse_or('(ab)b')
+strom = parse_or('a|b*')
+#print(strom)
+a = automation(strom)
+pp(a, width=100)
+a = automat_det(a)
+pp(a, width=100)
+#print(is_valid('', a))
 
-while False:
-    string = input().strip()
-    if string == 'End':
-        break
+vygen_automat = {}
+def gen():
+    global vygen_automat
+    vygen_automat = automat_det(automation(parse_or(entry.get().strip())))
+
+def validate():
+    valid = is_valid(text_input.get("1.0", tk.END).strip(), vygen_automat)
+    if valid:
+        result_label.config(text="Vyhovuje!")
+    else:
+        result_label.config(text="Nevyhovuje :(")
+
+# Create main window
+root = tk.Tk()
+root.title("Your App")
+root.geometry("400x400")
+root.configure(padx=20, pady=20)
+
+# Input field
+entry_label = tk.Label(root, text="Input:")
+entry_label.pack(anchor='w')
+entry = tk.Entry(root, width=40)
+entry.pack(pady=(0, 10))
+
+# Generate button
+generate_button = tk.Button(root, text="Generate", command=gen)
+generate_button.pack(pady=(0, 20))
+
+# Text widget
+text_label = tk.Label(root, text="Text Input:")
+text_label.pack(anchor='w')
+text_input = tk.Text(root, height=5, width=40)
+text_input.pack(pady=(0, 10))
+
+# Verify button
+verify_button = tk.Button(root, text="Verify", command=validate)
+verify_button.pack(pady=(0, 20))
+
+# Result label
+result_label = tk.Label(root, text="Answer will appear here", fg="blue")
+result_label.pack()
+
+# Start the app
+root.mainloop()
