@@ -254,9 +254,12 @@ def validate():
 
 # Create main window
 root = tk.Tk()
+root.attributes("-fullscreen", True)
 root.title("Your App")
-root.geometry("400x400")
 root.configure(padx=20, pady=20)
+def exit_fullscreen(event=None):
+    root.attributes("-fullscreen", False)
+root.bind("<Escape>", exit_fullscreen)
 
 # Input field
 entry_label = tk.Label(root, text="Input:")
@@ -274,7 +277,7 @@ generation_status_label.pack(pady=(0, 10))
 # Text widget
 text_label = tk.Label(root, text="Text Input:")
 text_label.pack(anchor='w')
-text_input = tk.Text(root, height=5, width=40)
+text_input = tk.Text(root, height=20, width=150)
 text_input.pack(pady=(0, 10))
 
 # Verify button
