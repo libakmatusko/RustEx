@@ -69,6 +69,8 @@ def parse_iter(regex):
 def parse_pran(regex):
     if regex == '(':
         raise BaseException("Zly vstup '('")
+    if regex.count('(') != regex.count(')'):
+        raise BaseException("Zly pocet '(' alebo ')'")
     if regex[0] == '(' and regex[-1] == ')':
         return parse_or(regex[1:-1])
     return regex #uz by to malo byt len jedno pismeno
