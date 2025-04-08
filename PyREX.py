@@ -30,6 +30,7 @@ def parse_or(regex):
         return parse_join(sub_regex[0])
     return ['|'] + [parse_join(x) for x in sub_regex]
 
+
 def parse_join(regex):
     sub_regex = []
     zaciatok = 0
@@ -42,6 +43,13 @@ def parse_join(regex):
             zatvorky += 1
         elif char == ")":
             zatvorky -= 1
+            if zatvorky == 0 and regex[i+1] != '*':
+                sub_regex.append(regex[zaciatok:i+1])
+                zaciatok = i+1
+    if zatvorky!=0:
+        if not(zatvorky==1 and regex[-1]==')'):
+            raise "neočekávaný konec řetězce"
+
     sub_regex.append(regex[zaciatok:])
     #print(sub_regex)
     if len(sub_regex) == 1:
@@ -133,13 +141,13 @@ class Mapa:
         i = -1
         self.stack = []
     def index(self, stav):
-        stav = tuple(sorted(list(set(stavy))))
-        if stav in slovnik:
-            return slovnik[stav]
-        i+=1
-        slovnik[stav] = i
-        self.stack.append(i)
-        return i
+        stav = tuple(sorted(list(set(stav))))
+        if stav in self.slovnik:
+            return self.slovnik[stav]
+        self.i+=1
+        self.slovnik[stav] = self.i
+        self.stack.append(self.i)
+        return self.i
     def pop(self):
         return self.stack.pop()
 
@@ -167,7 +175,7 @@ def automat_det(automat):
     return
 
 strom = parse_or('(ab)*b*|a(a|b)|ab*|')
-strom = parse_or('()a')
+strom = parse_or('*')
 print(strom)
 pp(automation(strom), width=100)
 
