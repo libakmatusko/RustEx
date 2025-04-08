@@ -114,10 +114,10 @@ def automation(strom):
                             node[znak].extend(aut['starting'])
                             node[znak] = list(set(node[znak]))
                 automat['nodes'].extend(aut['nodes'][n:])
-                automat['ending'] = aut['ending']
                 if any(e in automat['starting'] for e in automat['ending']):
                     automat['starting'].extend(aut['starting'])
                     automat['starting'] = list(set(automat['starting'])) #netreba ale bojim sa
+                automat['ending'] = aut['ending']
 
         elif operator == '*':
             automat = automaty[0]
@@ -207,7 +207,6 @@ pp(automation(strom), width=100)
 def is_valid(string, automat):
     n_i = automat['starting'][0]
     for char in string:
-        print(n_i)
         new_i = automat['nodes'][n_i][char]
         if new_i == []:
             return False
@@ -217,7 +216,7 @@ def is_valid(string, automat):
     return False
 
 strom = parse_or('(ab)b')
-strom = parse_or('a|b*')
+strom = parse_or('()a')
 #print(strom)
 a = automation(strom)
 pp(a, width=100)
