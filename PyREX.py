@@ -50,6 +50,8 @@ def parse_join(regex):
     return ['+'] + [parse_iter(x) for x in sub_regex]
 
 def parse_iter(regex):
+    if regex == '*':
+        raise "Nezadavaj hluposti, nevies pisat."
     if len(regex) == 0:
         return regex
     if regex[-1] == '*':
