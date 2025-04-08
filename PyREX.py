@@ -1,5 +1,6 @@
 from collections import defaultdict
 from pprint import pp
+import tkinter as tk
 
 #regex = input().strip()
 
@@ -104,6 +105,9 @@ def automation(strom):
                             node[znak] = list(set(node[znak]))
                 automat['nodes'].extend(aut['nodes'][n:])
                 automat['ending'] = aut['ending']
+                if any(e in automat['starting'] for e in automat['ending']):
+                    automat['starting'].extend(aut['starting'])
+                    automat['starting'] = list(set(automat['starting'])) #netreba ale bojim sa
 
         elif operator == '*':
             automat = automaty[0]
@@ -186,7 +190,7 @@ def automat_det(automat):
     return new_automat
 
 strom = parse_or('(ab)b')
-strom = parse_or('a*')
+strom = parse_or('()a')
 print(strom)
 pp(automation(strom), width=100)
 pp(automat_det(automation(strom)), width=100)
