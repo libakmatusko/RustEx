@@ -2,7 +2,6 @@ from collections import defaultdict
 from pprint import pp
 import tkinter as tk
 
-#regex = input().strip()
 
 '''
     // a|b    or
@@ -205,26 +204,54 @@ def is_valid(string, automat):
 
 strom = parse_or('(ab)b')
 strom = parse_or('a|b*')
-print(strom)
+#print(strom)
 a = automation(strom) 
 pp(a, width=100)
 a = automat_det(a)
 pp(a, width=100)
-print(is_valid('', a))
+#print(is_valid('', a))
 
+vygen_automat = {}
+def gen():
+    global vygen_automat
+    vygen_automat = automat_det(automation(parse_or(entry.get().strip())))
 
+def validate():
+    valid = is_valid(text_input.get("1.0", tk.END).strip(), vygen_automat)
+    if valid:
+        result_label.config(text="Vyhovuje!")
+    else:
+        result_label.config(text="Nevyhovuje :(")
 
-'''
-automat: {
-    strating : [],
-    ending : [],
-    nodes : [{
-        char:index
-    }]
-}
-'''
+# Create main window
+root = tk.Tk()
+root.title("Your App")
+root.geometry("400x400")
+root.configure(padx=20, pady=20)
 
-while False:
-    string = input().strip()
-    if string == 'End':
-        break
+# Input field
+entry_label = tk.Label(root, text="Input:")
+entry_label.pack(anchor='w')
+entry = tk.Entry(root, width=40)
+entry.pack(pady=(0, 10))
+
+# Generate button
+generate_button = tk.Button(root, text="Generate", command=gen)
+generate_button.pack(pady=(0, 20))
+
+# Text widget
+text_label = tk.Label(root, text="Text Input:")
+text_label.pack(anchor='w')
+text_input = tk.Text(root, height=5, width=40)
+text_input.pack(pady=(0, 10))
+
+# Verify button
+verify_button = tk.Button(root, text="Verify", command=validate)
+verify_button.pack(pady=(0, 20))
+
+# Result label
+result_label = tk.Label(root, text="Answer will appear here", fg="blue")
+result_label.pack()
+
+# Start the app
+root.mainloop()
