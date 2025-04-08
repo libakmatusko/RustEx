@@ -230,7 +230,7 @@ def gen():
     try:
         vygen_automat = automat_det(automation(parse_or(entry.get().strip())))
         generation_status_label.config(text="Generation completed!")
-    except Exception as x:
+    except BaseException as x:
         result_label.config(text=x)
 
 
@@ -241,8 +241,8 @@ def validate():
             result_label.config(text="Vyhovuje!")
         else:
             result_label.config(text="Nevyhovuje :(")
-    except x:
-        result_label.config(text=x)
+    except:
+        result_label.config(text='Zadavaj validny text.')
 
 # Create main window
 root = tk.Tk()
