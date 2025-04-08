@@ -227,15 +227,22 @@ pp(a, width=100)
 vygen_automat = {}
 def gen():
     global vygen_automat
-    vygen_automat = automat_det(automation(parse_or(entry.get().strip())))
-    generation_status_label.config(text="Generation completed!")
+    try:
+        vygen_automat = automat_det(automation(parse_or(entry.get().strip())))
+        generation_status_label.config(text="Generation completed!")
+    except Exception as x:
+        result_label.config(text=x)
+
 
 def validate():
-    valid = is_valid(text_input.get("1.0", tk.END).strip(), vygen_automat)
-    if valid:
-        result_label.config(text="Vyhovuje!")
-    else:
-        result_label.config(text="Nevyhovuje :(")
+    try:
+        valid = is_valid(text_input.get("1.0", tk.END).strip(), vygen_automat)
+        if valid:
+            result_label.config(text="Vyhovuje!")
+        else:
+            result_label.config(text="Nevyhovuje :(")
+    except x:
+        result_label.config(text=x)
 
 # Create main window
 root = tk.Tk()
