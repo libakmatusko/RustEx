@@ -1,4 +1,5 @@
 from collections import defaultdict
+from pprint import pp
 
 #regex = input().strip()
 
@@ -75,7 +76,7 @@ def automation(strom):
                 'starting': [0],
                 'ending': [1],
                 'nodes': [
-                    defaultdict(def_fun, {strom:1}),
+                    defaultdict(def_fun, {strom:[1]}),
                     defaultdict(def_fun)
                 ]
             }
@@ -90,20 +91,30 @@ def automation(strom):
                 automat['starting'].extend(automaty[i+1]['starting'])
                 automat['ending'].extend(automaty[i+1]['ending'])
                 automat['nodes'].extend(automaty[i+1]['nodes'][n:])
+
         elif operator == '+':
-            pass
+            automat = automaty[0]
+            for aut in automaty[1:]:
+                n = len(automat['nodes'])
+                automat_shift(aut, n)
+                for node in automat['nodes']:
+                    for znak, cesty in node.items():
+                        if any(e in cesty for e in automat['ending']):
+                            node[znak].extend(aut['starting'])
+                            node[znak] = list(set(node[znak]))
+                automat['nodes'].extend(aut['nodes'][n:])
+                automat['ending'] = aut['ending']
+
         elif operator == '*':
             automat = automaty[0]
-            automat['ending'] = set(automat['ending'])
             automat['ending'].extend(automat['starting'])
+            automat['ending'] = set(automat['ending'])
             automat['ending'] = list(automat['ending'])
             for node in automat['nodes']:
                 for znak, cesty in node.items():
                     if any(e in cesty for e in automat['ending']):
                         node[znak].extend(automat['starting'])
                         node[znak] = list(set(node[znak]))
-
-
 
     return automat
 
@@ -115,8 +126,17 @@ def automat_shift(automat, n):
         for k, v in node.items():
             node[k] = [x+n for x in v]
 
+
+def automat_det(automat):
+    
+
+    return automat
+
 strom = parse_or('(ab)*b*|a(a|b)|ab*|')
+strom = parse_or('a|b')
 print(strom)
+pp(automation(strom), width=100)
+
 a = {
     'starting': [0],
     'ending': [1],
@@ -126,7 +146,7 @@ a = {
     ]
 }
 automat_shift(a, 1)
-print(a)
+#print(a)
 
 '''
 automat: {
