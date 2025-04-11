@@ -10,8 +10,9 @@ import tkinter as tk
     // ()
     // .      hocijaky znak '(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9)'
 '''
+CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWWYZ, "
+
 def_fun = lambda: []
-def_fun2 = lambda: -1
 #tvarime sa ze funguje ale nefunguje
 def parse_or(regex):
     sub_regex = []
@@ -68,7 +69,7 @@ def parse_iter(regex):
 
 def parse_pran(regex):
     if regex == '.':
-        return parse_pran('(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9)')
+        return parse_pran('('+ '|'.join(CHARS) +')')
     if regex == '(':
         raise BaseException("Zly vstup '('")
     if regex.count('(') != regex.count(')'):
@@ -205,10 +206,61 @@ def automat_det(automat):
 
     return new_automat
 
-strom = parse_or('(ab)*b*|a(a|b)|ab*|')
-strom = parse_or('()a')
-print(strom)
-pp(automation(strom), width=100)
+class StateGen:
+    def __init__(self):
+        self.next_state = 0
+        self.states = {}
+        self.index_to_states = []
+    
+    def get_state(self, states_tuple):
+        if states_tuple in self.states:
+            return self.states[states_tuple]
+        self.states[states_tuple] = self.next_state
+        self.index_to_states.append(states_tuple)
+        self.next_state += 1
+        return self.next_state-1
+    
+    def get_edges(self, state_i):
+        edges = {}
+        for char, next_state in zip(CHARS, self.index_to_states[state_i][1:]):
+            if next_state != -1:
+                edges[char] = next_state
+        return edges
+
+
+def automat_min(automat):
+    states_groups = [int(i in automat['ending']) for i in range(len(automat['nodes']))]
+    new_states_group = []
+    while True:
+        group_gen = StateGen()
+        for i, node in enumerate(automat['nodes']):
+            changes = [states_groups[i]]
+            for char in CHARS:
+                next_node = node[char]
+                if next_node == []:
+                    changes.append(-1)
+                else:
+                    changes.append(states_groups[next_node])
+            changes = tuple(changes)
+            new_states_group.append(group_gen.get_state(changes))
+        
+        if states_groups == new_states_group:
+            new_states = set(states_groups)
+            return {
+                'starting':[states_groups[automat['starting'][0]]],
+                'ending':list(set([states_groups[x] for x in automat['starting']])),
+                'nodes':[defaultdict(def_fun, group_gen.get_edges(s)) for s in range(len(new_states))]
+            }
+
+        states_groups = new_states_group
+
+
+strom = parse_or('(a|bc)*')
+automat = automation(strom)
+det_automat = automat_det(automat)
+pp(det_automat, width=300)
+min_automat = automat_min(det_automat)
+pp(min_automat, width=300)
 
 def is_valid(string, automat):
     n_i = automat['starting'][0]
@@ -221,72 +273,64 @@ def is_valid(string, automat):
         return True
     return False
 
-strom = parse_or('(ab)b')
-strom = parse_or('.')
-#print(strom)
-a = automation(strom)
-pp(a, width=300)
-a = automat_det(a)
-pp(a, width=300)
-print(is_valid('a', a))
 
-vygen_automat = {}
-def gen():
-    global vygen_automat
-    try:
-        print(entry.get())
-        vygen_automat = automat_det(automation(parse_or(entry.get())))
-        generation_status_label.config(text="Generation completed!")
-    except BaseException as x:
-        generation_status_label.config(text=x)
+if False:
+    vygen_automat = {}
+    def gen():
+        global vygen_automat
+        try:
+            print(entry.get())
+            vygen_automat = automat_det(automation(parse_or(entry.get())))
+            generation_status_label.config(text="Generation completed!")
+        except BaseException as x:
+            generation_status_label.config(text=x)
 
 
-def validate():
-    try:
-        print(text_input.get("1.0", tk.END))
-        valid = is_valid(text_input.get("1.0", tk.END)[:-1], vygen_automat)
-        if valid:
-            result_label.config(text="Vyhovuje!")
-        else:
-            result_label.config(text="Nevyhovuje :(")
-    except:
-        result_label.config(text='Zadavaj validny text.')
+    def validate():
+        try:
+            print(text_input.get("1.0", tk.END))
+            valid = is_valid(text_input.get("1.0", tk.END)[:-1], vygen_automat)
+            if valid:
+                result_label.config(text="Vyhovuje!")
+            else:
+                result_label.config(text="Nevyhovuje :(")
+        except:
+            result_label.config(text='Zadavaj validny text.')
+    # Create main window
+    root = tk.Tk()
+    root.attributes("-fullscreen", True)
+    root.title("Your App")
+    root.configure(padx=20, pady=20)
+    def exit_fullscreen(event=None):
+        root.attributes("-fullscreen", False)
+    root.bind("<Escape>", exit_fullscreen)
 
-# Create main window
-root = tk.Tk()
-root.attributes("-fullscreen", True)
-root.title("Your App")
-root.configure(padx=20, pady=20)
-def exit_fullscreen(event=None):
-    root.attributes("-fullscreen", False)
-root.bind("<Escape>", exit_fullscreen)
+    # Input field
+    entry_label = tk.Label(root, text="Input:")
+    entry_label.pack(anchor='w')
+    entry = tk.Entry(root, width=40)
+    entry.pack(pady=(0, 10))
 
-# Input field
-entry_label = tk.Label(root, text="Input:")
-entry_label.pack(anchor='w')
-entry = tk.Entry(root, width=40)
-entry.pack(pady=(0, 10))
+    # Generate button
+    generate_button = tk.Button(root, text="Generate", command=gen)
+    generate_button.pack(pady=(0, 20))
 
-# Generate button
-generate_button = tk.Button(root, text="Generate", command=gen)
-generate_button.pack(pady=(0, 20))
+    generation_status_label = tk.Label(root, text="", fg="green")
+    generation_status_label.pack(pady=(0, 10))
 
-generation_status_label = tk.Label(root, text="", fg="green")
-generation_status_label.pack(pady=(0, 10))
+    # Text widget
+    text_label = tk.Label(root, text="Text Input:")
+    text_label.pack(anchor='w')
+    text_input = tk.Text(root, height=20, width=150)
+    text_input.pack(pady=(0, 10))
 
-# Text widget
-text_label = tk.Label(root, text="Text Input:")
-text_label.pack(anchor='w')
-text_input = tk.Text(root, height=20, width=150)
-text_input.pack(pady=(0, 10))
+    # Verify button
+    verify_button = tk.Button(root, text="Verify", command=validate)
+    verify_button.pack(pady=(0, 20))
 
-# Verify button
-verify_button = tk.Button(root, text="Verify", command=validate)
-verify_button.pack(pady=(0, 20))
+    # Result label
+    result_label = tk.Label(root, text="Answer will appear here", fg="blue")
+    result_label.pack()
 
-# Result label
-result_label = tk.Label(root, text="Answer will appear here", fg="blue")
-result_label.pack()
-
-# Start the app
-root.mainloop()
+    # Start the app
+    root.mainloop()
