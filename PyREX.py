@@ -232,6 +232,7 @@ def automat_min(automat):
     states_groups = [int(i in automat['ending']) for i in range(len(automat['nodes']))]
     new_states_group = []
     while True:
+        print(states_groups)
         group_gen = StateGen()
         for i, node in enumerate(automat['nodes']):
             changes = [states_groups[i]]
@@ -248,14 +249,14 @@ def automat_min(automat):
             new_states = set(states_groups)
             return {
                 'starting':[states_groups[automat['starting'][0]]],
-                'ending':list(set([states_groups[x] for x in automat['starting']])),
+                'ending':list(set([states_groups[x] for x in automat['ending']])),
                 'nodes':[defaultdict(def_fun, group_gen.get_edges(s)) for s in range(len(new_states))]
             }
 
         states_groups = new_states_group
 
 
-strom = parse_or('(a|bc)*')
+strom = parse_or('(a|bc)*ba|a*ccb')
 automat = automation(strom)
 det_automat = automat_det(automat)
 pp(det_automat, width=300)
@@ -280,7 +281,7 @@ if False:
         global vygen_automat
         try:
             print(entry.get())
-            vygen_automat = automat_det(automation(parse_or(entry.get())))
+            vygen_automat = automat_min(automat_det(automation(parse_or(entry.get()))))
             generation_status_label.config(text="Generation completed!")
         except BaseException as x:
             generation_status_label.config(text=x)
