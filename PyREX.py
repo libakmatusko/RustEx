@@ -11,6 +11,7 @@ import tkinter as tk
     // .      hocijaky znak '(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9)'
 '''
 CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWWYZ, "
+#CHARS = "abcd"
 
 def_fun = lambda: []
 #tvarime sa ze funguje ale nefunguje
@@ -185,7 +186,6 @@ def automat_det(automat):
 
     m.index(automat['starting'])
     while not m.empty():
-        #pp(new_automat, width=300)
         new_i = m.pop()
         nodes = m.rev(new_i)
         new_node = defaultdict(def_fun)
@@ -230,9 +230,9 @@ class StateGen:
 
 def automat_min(automat):
     states_groups = [int(i in automat['ending']) for i in range(len(automat['nodes']))]
-    new_states_group = []
     while True:
-        print(states_groups)
+        new_states_group = []
+        #print(states_groups)
         group_gen = StateGen()
         for i, node in enumerate(automat['nodes']):
             changes = [states_groups[i]]
@@ -256,10 +256,10 @@ def automat_min(automat):
         states_groups = new_states_group
 
 
-strom = parse_or('(a|bc)*ba|a*ccb')
+strom = parse_or('.*(a|bbc).*')
 automat = automation(strom)
 det_automat = automat_det(automat)
-pp(det_automat, width=300)
+#pp(det_automat, width=300)
 min_automat = automat_min(det_automat)
 pp(min_automat, width=300)
 
@@ -274,8 +274,10 @@ def is_valid(string, automat):
         return True
     return False
 
+#print([is_valid(x, det_automat) for x in ['dad', 'dbbcd', 'a', 'bbc', 'abbcd', 'babc', 'bbbc', 'bcbb']])
+#print([is_valid(x, min_automat) for x in ['dad', 'dbbcd', 'a', 'bbc', 'abbcd', 'babc', 'bbbc', 'bcbb']])
 
-if False:
+if True:
     vygen_automat = {}
     def gen():
         global vygen_automat
@@ -285,11 +287,11 @@ if False:
             generation_status_label.config(text="Generation completed!")
         except BaseException as x:
             generation_status_label.config(text=x)
+        print(automat_min(vygen_automat))
 
 
     def validate():
         try:
-            print(text_input.get("1.0", tk.END))
             valid = is_valid(text_input.get("1.0", tk.END)[:-1], vygen_automat)
             if valid:
                 result_label.config(text="Vyhovuje!")
